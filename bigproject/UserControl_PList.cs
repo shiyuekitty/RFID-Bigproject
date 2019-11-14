@@ -15,13 +15,6 @@ namespace bigproject
     {
         string _str;
         private Reader reader = new Reader();
-        public delegate void DelegateShowMessage(String strID);
-        public event DelegateShowMessage EventShowMessage1;
-        
-        public UserControl_PList()
-        {
-            InitializeComponent();
-        }
         public UserControl_PList(String str)
         {
             InitializeComponent();
@@ -29,6 +22,7 @@ namespace bigproject
         }
         void reader_eventWG(String data)
         {
+            data = _str;
             listBox.Items.Add(data);
         }
         private void UserControl_PList_Load(object sender, EventArgs e)

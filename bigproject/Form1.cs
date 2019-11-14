@@ -30,14 +30,13 @@ namespace bigproject
         private SerialPort serialPort;
         Panel panel = new Panel();
         KV_ISO15693.Reader read = new KV_ISO15693.Reader();
-        //private Thread thread_125k;
         private KV_125K.Reader reader = new KV_125K.Reader();
         public Form1()
         {
             InitializeComponent();
         }
         /// <summary>
-        /// 打开按钮
+        /// 15693卡打开按钮
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -66,15 +65,16 @@ namespace bigproject
                 }
             }
         }
+        /// <summary>
+        /// 125K卡打开按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void but_People_Click(object sender, EventArgs e)
         {
             if (reader.OpenPort(comboBox1.Text, Convert.ToInt32(textBox1.Text)) == "")
             {
                 MessageBox.Show("125K串口打开成功!");
-                thread_125k = new Thread(ReceiveData);
-                thread_125k.IsBackground = true;
-                thread_125k.Start();
-
             }
             else
             {
@@ -98,6 +98,7 @@ namespace bigproject
                 AppDomain.CurrentDomain.SetData("DataDirectory", dataDir);
             }
 
+            System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
             string[] portID = SerialPort.GetPortNames();
             if (portID.Length < 0)
             {
@@ -191,41 +192,21 @@ namespace bigproject
      /// </summary>
      /// <param name="sender"></param>
      /// <param name="e"></param>
-        private void ReceiveData()
+
+        void reader_eventWG(string data)
         {
-            string str = "0";
-            byte[] rcvdata = new byte[5];
-            while (IsOpen_125k)
-            {
-                while (serialPort.BytesToRead > 4)
-                {
-                    int count = serialPort.Read(rcvdata, 0, 5);
-                    if (count == 5)
-                    {
-                        string time = DateTime.Now.ToLongTimeString();
-                        foreach (byte value in rcvdata)
-                        {
-                            str += string.Format("{0:X2}", value);
-                        }
-                        string strWGData = string.Format("{0}:{1:D3},{2:D5}", time, rcvdata[1], rcvdata[2] * 256 + rcvdata[3]); 
-                    }
-                }
-            }
+            strID = data;
+            MessageBox.Show(data);
         }
-        private void pl_EventShowMessage1(String strBlock)
-        {
-            //rea
-        }
+        
         private void button6_Click(object sender, EventArgs e)
         {
-            //thread_125k = new Thread(ReceiveData);
-            //thread_125k.Start();
-            MessageBox.Show(strWGData);
             UserControl_PList pl = new UserControl_PList(strID);
+            reader_eventWG(strID);
             this.splitContainer1.Panel2.Controls.Clear();
             this.splitContainer1.Panel2.Controls.Add(pl);
-            pl.EventShowMessage1 += pl_EventShowMessage1;
         }
+
 
 
         /// <summary>
@@ -235,6 +216,7 @@ namespace bigproject
         /// <param name="e"></param>
         private void button7_Click(object sender, EventArgs e)
         {
+
             UserControl_Delete de = new UserControl_Delete(BookNo);
             this.splitContainer1.Panel2.Controls.Clear();
             this.splitContainer1.Panel2.Controls.Add(de);
